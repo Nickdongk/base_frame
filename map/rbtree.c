@@ -22,7 +22,7 @@
 */
 
 #include "rbtree.h"
-
+//rotate  left 
 static void __rb_rotate_left(struct rb_node *node, struct rb_root *root)
 {
 	struct rb_node *right = node->rb_right;
@@ -33,7 +33,8 @@ static void __rb_rotate_left(struct rb_node *node, struct rb_root *root)
 	right->rb_left = node;
 
 	rb_set_parent(right, parent);
-
+// if parent exist, set the new middle node
+//global var root point to the root node
 	if (parent)
 	{
 		if (node == parent->rb_left)
@@ -43,6 +44,7 @@ static void __rb_rotate_left(struct rb_node *node, struct rb_root *root)
 	}
 	else
 		root->rb_node = right;
+
 	rb_set_parent(node, right);
 }
 
@@ -73,34 +75,34 @@ void rb_insert_color(struct rb_node *node, struct rb_root *root)
 {
 	struct rb_node *parent, *gparent;
 
-	while ((parent = rb_parent(node)) && rb_is_red(parent))
+	while ((parent = rb_parent(node)) && rb_is_red(parent))  //当父节点为红色
 	{
-		gparent = rb_parent(parent);
+		gparent = rb_parent(parent);//获取祖父节点
 
-		if (parent == gparent->rb_left)
+		if (parent == gparent->rb_left) //当父节点为祖父节点的左孩子
 		{
 			{
-				register struct rb_node *uncle = gparent->rb_right;
-				if (uncle && rb_is_red(uncle))
+				register struct rb_node *uncle = gparent->rb_right; //获取叔节点
+				if (uncle && rb_is_red(uncle)) //叔节点存在且为红色
 				{
-					rb_set_black(uncle);
-					rb_set_black(parent);
-					rb_set_red(gparent);
-					node = gparent;
+					rb_set_black(uncle); //设置叔节点为黑色
+					rb_set_black(parent);// 设置父节点为黑色
+					rb_set_red(gparent); //设置祖父节点为红色
+					node = gparent; //向上走
 					continue;
 				}
 			}
-
+            //叔节点为黑色，节点为父节点的右节点
 			if (parent->rb_right == node)
 			{
 				register struct rb_node *tmp;
-				__rb_rotate_left(parent, root);
+				__rb_rotate_left(parent, root);//左旋，转换为父节点的左节点
 				tmp = parent;
 				parent = node;
 				node = tmp;
 			}
 
-			rb_set_black(parent);
+			rb_set_black(parent);//
 			rb_set_red(gparent);
 			__rb_rotate_right(gparent, root);
 		} else {
@@ -225,13 +227,15 @@ void rb_erase(struct rb_node *node, struct rb_root *root)
 		child = node->rb_left;
 	else
 	{
+		//两个叶子节点
 		struct rb_node *old = node, *left;
-
+		//取node的后继
 		node = node->rb_right;
 		while ((left = node->rb_left) != NULL)
 			node = left;
 
 		if (rb_parent(old)) {
+			//删除node节点
 			if (rb_parent(old)->rb_left == old)
 				rb_parent(old)->rb_left = node;
 			else

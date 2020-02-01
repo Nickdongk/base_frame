@@ -124,6 +124,7 @@ struct rb_node
 } __attribute__((aligned(sizeof(long))));
     /* The alignment might seem pointless, but allegedly CRIS needs it */
 
+//point to the root node
 struct rb_root
 {
 	struct rb_node *rb_node;
