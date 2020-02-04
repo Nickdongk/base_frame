@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
     int *r_var = NULL;
     struct set *string_set = NULL;  
     struct set *num_set = NULL;
+    struct set *merge_set = NULL;
 
 
     string_set = create_set();
@@ -38,6 +39,12 @@ int main(int argc, char *argv[])
     put_to_set(num_set, &var1);
     put_to_set(num_set, &var2);
 
+    merge_set = uni_set(string_set, num_set);
+
+    r_str = get_from_set(merge_set, content);
+    if (r_str)
+        printf("%s is in union\n", content);
+
     r_str = get_from_set(string_set, content);
     if (r_str) 
         printf("%s is in string_set\n", content);
@@ -48,10 +55,10 @@ int main(int argc, char *argv[])
 
 fail:
     if (string_set) 
-        free_set(string_set);
-
+        release_set(string_set);
     if (num_set)
-        free_set(num_set);
-
+        release_set(num_set);
+    if (merge_set)
+        release_set(merge_set);
     return 0;
 }

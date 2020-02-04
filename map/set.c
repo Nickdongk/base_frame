@@ -15,7 +15,7 @@ struct set *create_set(void)
         return NULL;
 
     rset->root.rb_node = NULL;
-    rset->count = 0;
+    rset->nodes_num = 0;
 
     return rset;
 }
@@ -74,7 +74,7 @@ int put_to_set(struct set *set_in, void* val)
 
     rb_link_node(&pset_n->node, parent, new_node);
     rb_insert_color(&pset_n->node, &set_in->root);
-    set_in->count ++;
+    set_in->nodes_num ++;
 
     return 1;
 }
@@ -91,6 +91,128 @@ struct set_n *set_next_node(struct set_n *set_node)
     struct rb_node *next =  rb_next(&set_node->node);
     return rb_entry(next, struct set_n, node);
 }
+
+int is_child_set(struct set *src_set, struct set *dst_set)
+{
+   struct set_n *tmp_set_node = NULL;
+   void *val = NULL;
+
+   if (src_set->nodes_num > dst_set->nodes_num)
+        return 0;
+
+   tmp_set_node = set_first_node(src_set);
+   if (!tmp_set_node) {
+       fprintf(stderr, "src set is empty\n");
+       return -1;
+   } 
+
+    while (tmp_set_node) {
+        val = get_from_set(dst_set, tmp_set_node);
+        if (!val)
+            return 0;
+        tmp_set_node = set_next_node(tmp_set_node); 
+    }
+
+    if (src_set->nodes_num < dst_set->nodes_num)
+        return 1;
+    if (src_set->nodes_num == dst_set->nodes_num)
+        return 2;    
+}
+
+struct set *uni_set(struct set *src_set, struct set *dst_set)
+{
+    struct set *r_set = NULL;    
+    struct set_n *tmp_set_node = NULL;
+    struct set_n *dst_set_node = NULL;
+    void *r_val = NULL;
+    int ret = 0;
+
+    ret = is_child_set(src_set, dst_set);
+    if (ret > 0)
+        return dst_set;
+    
+    ret = is_child_set(dst_set, src_set);
+    if (ret > 0)
+        return src_set;
+
+    r_set = create_set(); 
+    if (!r_set) {
+        fprintf(stderr, "fail to create set\n");
+        return NULL;
+    }
+
+    tmp_set_node = set_first_node(src_set); 
+    if (!tmp_set_node) {
+        fprintf(stderr, "no node in set\n");
+        goto fail;
+    }
+
+    while (tmp_set_node) {
+        if (tmp_set_node->val)
+            put_to_set(r_set, tmp_set_node->val);    
+        tmp_set_node = set_next_node(tmp_set_node);
+    }
+
+    tmp_set_node = set_first_node(dst_set);
+    if (!tmp_set_node) {
+        fprintf(stderr, "no node in dst set\n");
+        goto fail;
+    }
+
+    while (tmp_set_node) {
+        r_val = get_from_set(r_set, tmp_set_node->val); 
+        if (!r_val)  
+            put_to_set(r_set, tmp_set_node->val);
+        tmp_set_node = set_next_node(tmp_set_node);
+    }
+    return r_set;
+fail:
+    if (r_set)
+        release_set(r_set);
+
+    return NULL;
+}
+
+struct set *intersection_set(struct set *src_set, struct set *dst_set)
+{
+    struct set *r_set = NULL;     
+    struct set_n *tmp_set_node = NULL;
+    void *r_val = NULL;
+    int ret = 0;
+
+    ret = is_child_set(src_set, dst_set); 
+    if (ret > 0)
+        return src_set;
+    ret = is_child_set(dst_set, src_set);
+    if (ret > 0)
+        return dst_set;
+
+    r_set = create_set(); 
+    if (!r_set) {
+        fprintf(stderr, "fail to create set\n");
+        return NULL;
+    }
+
+    tmp_set_node = set_first_node(src_set); 
+    if (!tmp_set_node) {
+        fprintf(stderr, "no node in set\n");
+        goto fail;
+    }
+    
+    while (tmp_set_node) {
+       r_val = get_from_set(dst_set, tmp_set_node->val); 
+       if (r_val)
+            put_to_set(r_set, tmp_set_node->val);
+       tmp_set_node = set_next_node(tmp_set_node);
+    }
+
+    return r_set;  
+fail:
+    if (r_set)
+        release_set(r_set);
+    return NULL;
+}
+
 
 static void free_set_node(struct set_n *pnode) 
 {
@@ -116,7 +238,7 @@ static void free_set_node(struct set_n *pnode)
     free(tmp_set_node);
 }
 
-void free_set(struct set *tree)
+void release_set(struct set *tree)
 {
     struct set_n *tmp_set_node = NULL;
 
