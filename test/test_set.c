@@ -14,51 +14,59 @@ int main(int argc, char *argv[])
     int var1 = 50;
     int var2 = 25;
     int *r_var = NULL;
+    int ret = 0;
     struct set *string_set = NULL;  
     struct set *num_set = NULL;
     struct set *merge_set = NULL;
 
 
-    string_set = create_set();
+    string_set = set_create();
     if (!string_set) {
         fprintf(stderr, "fail to create set\n");
         return -1;
     }
 
-    num_set = create_set();
+    num_set = set_create();
     if (!num_set) {
         fprintf(stderr, "fail to create set\n");
         goto fail; 
     }
 
-    put_to_set(string_set, content);
-    put_to_set(string_set, content1);
-    put_to_set(string_set, content2);
+    set_add(string_set, content, strlen(content));
+    set_add(string_set, content1, strlen(content1));
+    set_add(string_set, content2, strlen(content2));
 
-    put_to_set(num_set, &var);
-    put_to_set(num_set, &var1);
-    put_to_set(num_set, &var2);
+    set_add(num_set, &var, sizeof(var));
+    set_add(num_set, &var1, sizeof(var1));
+    set_add(num_set, &var2, sizeof(var2));
 
-    merge_set = uni_set(string_set, num_set);
+    merge_set = set_union(string_set, num_set);
 
-    r_str = get_from_set(merge_set, content);
-    if (r_str)
+    ret = set_contain(merge_set, content, strlen(content));
+    if (ret)
         printf("%s is in union\n", content);
 
-    r_str = get_from_set(string_set, content);
-    if (r_str) 
+    ret = set_contain(string_set, content, strlen(content));
+    if (ret) 
         printf("%s is in string_set\n", content);
 
-    r_var = get_from_set(num_set, &var);
-    if (r_var)
-        printf("%d is in num_set\n", *r_var);
+    ret = set_contain(num_set, &var, sizeof(var));
+    if (ret)
+        printf("%d is in num_set\n", var);
+
+    set_remove(num_set, &var, sizeof(var));
+    ret = set_contain(num_set, &var, sizeof(var));
+    if (!ret)
+        printf("%d is not in num_set\n", var);
+
+
 
 fail:
     if (string_set) 
-        release_set(string_set);
+        set_release(string_set);
     if (num_set)
-        release_set(num_set);
+        set_release(num_set);
     if (merge_set)
-        release_set(merge_set);
+        set_release(merge_set);
     return 0;
 }

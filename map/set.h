@@ -2,14 +2,16 @@
  * @file hash.h
  * @author zk(zkdnfc@163.com)
  * @date 2016/05/31 18:26:01
- * @version $Revision$ 
- * @brief 
- *  
+ * @version $Revision$
+ * @brief
+ *
  * */
 #ifndef _SET_H
 #define _SET_H
 
 #include "rbtree.h"
+#include <stdlib.h>
+#include <string.h>
 
 struct set {
     struct rb_root root;
@@ -19,20 +21,24 @@ struct set {
 struct set_n {
     struct rb_node node;
     void *val;
+    size_t len;
 };
 
-extern struct set *create_set(void);
-extern void release_set(struct set *tree);
+extern struct set *set_create(void);
+extern void set_release(struct set *src_set);
 
-extern struct set_n *set_first_node(struct set *tree); 
-extern struct set_n *set_next_node(struct set_n *set_node); 
+extern struct set_n *set_first(struct set *tree);
+extern struct set_n *set_next(struct set_n *set_node);
 
-extern struct set *uni_set(struct set *src_set, struct set *dst_set);
-extern struct set *intersection_set(struct set *src_set, struct set *dst_set);
+extern struct set *set_union(struct set *src_set, struct set *dst_set);
+extern struct set *set_intersection(struct set *src_set, struct set *dst_set);
 
-extern int is_child_set(struct set *src_set, struct set *dst_set);  
+extern int set_is_subset(struct set *src_set, struct set *dst_set);
 
-extern int put_to_set(struct set *set_in, void* val); 
-extern void *get_from_set(struct set *set_in, void *addr); 
-
+extern int set_add(struct set *src_set, void *val, size_t len);
+extern int set_contain(struct set *src_set, void *val, size_t len);
+extern int set_remove(struct set *src_set,void *val, size_t len);
+extern size_t set_length(struct set *src_set);
+extern struct set *set_difference(struct set *src_set, struct set *dst_set);
+extern int set_cmp(struct set *src_set, struct set *dst_set);
 #endif  //_MAP_H
