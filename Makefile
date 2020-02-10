@@ -8,15 +8,16 @@ TOP_DIR:= $(shell pwd)
 HEADERS_DIR := $(shell pwd)/target/include
 LIBS_DIR := $(shell pwd)/target/lib
 EXAMPLE_DIR := $(shell pwd)/test/
-SHARE_HEADERS_DIR :=$(TOP_DIR)/share/include
+
 
 HEADERS_FILE:= $(TOP_DIR)/target/include/.headers
+HEADERS_ALL:= $(wildcard $(TOP_DIR)/share/include/*/*.h)
+HEADERS_ALL += $(wildcard $(TOP_DIR)/map/*.h)
+HEADERS_ALL += $(wildcard $(TOP_DIR)/set/*.h)
 
-SRCS +=$(wildcard $(TOP_DIR)/hash/*.c)
-SRCS += $(wildcard $(TOP_DIR)/list/*.c)
 SRCS += $(wildcard $(TOP_DIR)/map/*.c)
 SRCS += $(wildcard $(TOP_DIR)/set/*.c)
-SRCS += $(wildcard $(TOP_DIR)/share/src/*.c)
+SRCS += $(wildcard $(TOP_DIR)/share/src/*/*.c)
 
 OBJS:=$(patsubst %.c, %.o, $(SRCS))
 
@@ -24,29 +25,25 @@ TEST_SRCS := $(wildcard $(TOP_DIR)/test/*.c)
 TEST_OBJS := $(patsubst %.c,%, $(TEST_SRCS))
 
 
-.phony: all headers libs example clean
+.phony: all libs example clean
 
 all: example
 
-libs: $(OBJS)
+libs: $(OBJS) 
 	$(AR) cr $(LIBS_DIR)/libbase.a $(OBJS)
 
+$(OBJS): $(HEADERS_FILE)
+
 %.o: %.c
-	$(CC) -c $(CFLAGS) $^ -o $@ -I$(SHARE_HEADERS_DIR)
+	$(CC) -c $(CFLAGS) $< -o $@ -I$(HEADERS_DIR)
 
 example: $(TEST_OBJS)
 
-$(TOP_DIR)/test/%: $(TOP_DIR)/test/%.c libs headers
+$(TOP_DIR)/test/%: $(TOP_DIR)/test/%.c libs 
 	$(CC) -o $@ $< -I$(HEADERS_DIR) -L$(LIBS_DIR) -lbase
 
-headers: $(HEADERS_FILE)
-
 $(HEADERS_FILE):
-	cp $(TOP_DIR)/hash/*.h $(HEADERS_DIR)
-	cp $(TOP_DIR)/list/*.h $(HEADERS_DIR)
-	cp $(TOP_DIR)/map/*.h $(HEADERS_DIR)
-	cp $(TOP_DIR)/set/*.h $(HEADERS_DIR)
-	cp $(SHARE_HEADERS_DIR)/*.h $(HEADERS_DIR)
+	cp $(HEADERS_ALL) $(HEADERS_DIR)
 	touch $@
 
 clean:
