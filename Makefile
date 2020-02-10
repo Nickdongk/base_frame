@@ -2,15 +2,21 @@ CROSS_COMPILER:=
 CC:= $(CROSS_COMPILE)gcc
 AR:= $(CROSS_COMPILE)ar
 CFLAGS:= -fPIC
+
 TOP_DIR:= $(shell pwd)
+
 HEADERS_DIR := $(shell pwd)/target/include
 LIBS_DIR := $(shell pwd)/target/lib
 EXAMPLE_DIR := $(shell pwd)/test/
+SHARE_HEADERS_DIR :=$(TOP_DIR)/share/include
+
 HEADERS_FILE:= $(TOP_DIR)/target/include/.headers
 
 SRCS +=$(wildcard $(TOP_DIR)/hash/*.c)
 SRCS += $(wildcard $(TOP_DIR)/list/*.c)
 SRCS += $(wildcard $(TOP_DIR)/map/*.c)
+SRCS += $(wildcard $(TOP_DIR)/set/*.c)
+SRCS += $(wildcard $(TOP_DIR)/share/src/*.c)
 
 OBJS:=$(patsubst %.c, %.o, $(SRCS))
 
@@ -26,7 +32,7 @@ libs: $(OBJS)
 	$(AR) cr $(LIBS_DIR)/libbase.a $(OBJS)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $^ -o $@
+	$(CC) -c $(CFLAGS) $^ -o $@ -I$(SHARE_HEADERS_DIR)
 
 example: $(TEST_OBJS)
 
@@ -39,6 +45,8 @@ $(HEADERS_FILE):
 	cp $(TOP_DIR)/hash/*.h $(HEADERS_DIR)
 	cp $(TOP_DIR)/list/*.h $(HEADERS_DIR)
 	cp $(TOP_DIR)/map/*.h $(HEADERS_DIR)
+	cp $(TOP_DIR)/set/*.h $(HEADERS_DIR)
+	cp $(SHARE_HEADERS_DIR)/*.h $(HEADERS_DIR)
 	touch $@
 
 clean:

@@ -9,7 +9,7 @@
 #ifndef _SET_H
 #define _SET_H
 
-#include "rbtree.h"
+#include <rbtree.h>
 #include <stdlib.h>
 #include <string.h>
 
