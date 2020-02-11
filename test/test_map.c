@@ -11,6 +11,7 @@ int main(int argc, char *argv[])
     struct map *g_map = NULL;
     struct map_n *n_map = NULL;
     char *r_val = NULL;
+    size_t val_len;
     int ret = 0;
     int i = 0;
 
@@ -34,7 +35,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    r_val = map_get(g_map, "hello1");
+    r_val = map_get(g_map, "hello1", &val_len);
     if (!r_val) {
         fprintf(stderr, "not found key hello1\n");
         goto not_found;
@@ -42,7 +43,7 @@ int main(int argc, char *argv[])
 
     printf("get str: %s\n", r_val);
     r_val = NULL;
-    r_val = map_get(g_map, "hello10");
+    r_val = map_get(g_map, "hello10", &val_len);
     if (!r_val) {
         fprintf(stderr, "not found key hello10\n");
         goto not_found;

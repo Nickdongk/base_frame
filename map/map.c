@@ -49,7 +49,7 @@ int map_remove(struct map *map, char *key)
         struct map_n *pmap = container_of(node, struct map_n, node);
 
         //compare between the key with the keys in map
-        int cmp = strcmp(str, pmap->key);
+        int cmp = strcmp(key, pmap->key);
         if (cmp < 0) {
             node = node->rb_left;
         } else if (cmp > 0) {
@@ -69,7 +69,7 @@ size_t map_length(struct map *map)
     return map->count;
 }
 
-int map_add(struct map *map, char* key, void* val, unsigned int val_len)
+int map_add(struct map *map, char* key, void* val, size_t val_len)
 {
     struct map_n *pmap = NULL;
     struct rb_node **new_node = &map->root.rb_node;
