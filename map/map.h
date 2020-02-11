@@ -20,7 +20,7 @@
 
 struct map {
     struct rb_root root;
-    unsigned int count;
+    size_t count;
 };
 
 struct map_n {
@@ -31,12 +31,14 @@ struct map_n {
 };
 
 extern struct map *map_create(void);
-extern void map_release(struct map *src_map);
+extern void map_release(struct map *map);
 
-extern struct map_n *map_first(struct map *tree);
+extern struct map_n *map_first(struct map *map);
 extern struct map_n *map_next(struct map_n *map_node);
 extern int map_add(struct map *map, char* key, void* val, unsigned int val_len);
+extern int map_remove(struct map *map, char *key);
 extern void *map_get(struct map *map, char *str);
+extern size_t map_length(struct map *map);
 
 #endif  //_MAP_H
 

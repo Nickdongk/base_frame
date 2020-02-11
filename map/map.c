@@ -19,7 +19,7 @@ struct map *map_create(void)
     return rmap;
 }
 
-void *map_get(struct map *map, char *str)
+void *map_get(struct map *map, char *str, size_t *val_len)
 {
   struct rb_node *node = map->root.rb_node;
    while (node) {
@@ -32,11 +32,41 @@ void *map_get(struct map *map, char *str)
         } else if (cmp > 0) {
             node = node->rb_right;
         } else {
+            *val_len = pmap->val_len;
             return (pmap->val);
         }
    }
 
+   *val_len = 0;
    return NULL;
+}
+
+int map_remove(struct map *map, char *key)
+{
+  struct rb_node *node = map->root.rb_node;
+
+   while (node) {
+        struct map_n *pmap = container_of(node, struct map_n, node);
+
+        //compare between the key with the keys in map
+        int cmp = strcmp(str, pmap->key);
+        if (cmp < 0) {
+            node = node->rb_left;
+        } else if (cmp > 0) {
+            node = node->rb_right;
+        } else {
+            map->count --;
+            rb_erase(&pmap->node, &map->root);
+            return 1;
+        }
+   }
+
+   return 0;
+}
+
+size_t map_length(struct map *map)
+{
+    return map->count;
 }
 
 int map_add(struct map *map, char* key, void* val, unsigned int val_len)
