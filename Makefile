@@ -14,9 +14,11 @@ HEADERS_FILE:= $(TOP_DIR)/target/include/.headers
 HEADERS_ALL:= $(wildcard $(TOP_DIR)/share/include/*/*.h)
 HEADERS_ALL += $(wildcard $(TOP_DIR)/map/*.h)
 HEADERS_ALL += $(wildcard $(TOP_DIR)/set/*.h)
+HEADERS_ALL += $(wildcard $(TOP_DIR)/multimap/*.h)
 
 SRCS += $(wildcard $(TOP_DIR)/map/*.c)
 SRCS += $(wildcard $(TOP_DIR)/set/*.c)
+SRCS += $(wildcard $(TOP_DIR)/multimap/*.c)
 SRCS += $(wildcard $(TOP_DIR)/share/src/*/*.c)
 
 OBJS:=$(patsubst %.c, %.o, $(SRCS))
