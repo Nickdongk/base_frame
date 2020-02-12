@@ -4,6 +4,12 @@
 #include <unistd.h>
 #include <string.h>
 
+void release_mapnode(struct map_n *node)
+{
+    if (node->val)
+        free(node->val);
+}
+
 int main(int argc, char *argv[])
 {
     char key[16] = {0};
@@ -67,7 +73,7 @@ fail:
     }
 
     if (g_map)
-        map_release(g_map);
+        map_release(g_map, release_mapnode);
 
     return 0;
 }

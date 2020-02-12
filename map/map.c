@@ -140,20 +140,20 @@ struct map_n *map_next(struct map_n *map_node)
     return rb_entry(next, struct map_n, node);
 }
 
-static void free_map_node(struct map_n *pnode)
+static void free_map_tree(struct map_n *pnode, release_map_node release_func)
 {
     struct map_n *tmp_map_node = NULL;
 
    if (pnode->node.rb_left) {
         tmp_map_node = rb_entry(pnode->node.rb_left,
           struct map_n, node);
-        free_map_node(tmp_map_node);
+        free_map_tree(tmp_map_node, release_func);
    }
 
     if (pnode->node.rb_right) {
         tmp_map_node = rb_entry(pnode->node.rb_right,
             struct map_n, node);
-        free_map_node(tmp_map_node);
+        free_map_tree(tmp_map_node, release_func);
     }
 
     pnode->node.rb_left = NULL;
@@ -162,10 +162,12 @@ static void free_map_node(struct map_n *pnode)
     if (tmp_map_node->key)
         free(tmp_map_node->key);
 
+    release_func(tmp_map_node);
+
     free(tmp_map_node);
 }
 
-void map_release(struct map *src_map)
+void map_release(struct map *src_map, release_map_node release_callback)
 {
     struct map_n *tmp_map_node = NULL;
 
@@ -176,5 +178,5 @@ void map_release(struct map *src_map)
         return;
 
     tmp_map_node = rb_entry(src_map->root.rb_node, struct map_n, node);
-    free_map_node(tmp_map_node);
+    free_map_tree(tmp_map_node, release_callback);
 }

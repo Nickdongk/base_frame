@@ -63,9 +63,11 @@ int  multimap_remove(struct multimap *map, char *key, void *val, size_t val_len)
             }
             if (plist && &plist->head != &pmap->entry) {
                 list_del(&plist->head);
+                free(plist);
                 pmap->num --;
                 if (!pmap->num) {
                     rb_erase(&pmap->node, &map->root);
+                    free(pmap);
                     map->count --;
                 }
                 return  1;
@@ -168,7 +170,7 @@ struct multimap_n *multimap_next(struct multimap_n *map_node)
     return rb_entry(next, struct multimap_n, node);
 }
 
-static void free_multimap_node(struct multimap_n *pnode)
+static void free_multimap_tree(struct multimap_n *pnode, release_multimap_node release_callback)
 {
     struct multimap_n *tmp_map_node = NULL;
     struct multimap_list_n *list_node = NULL, *tmp_list_node = NULL;
@@ -176,13 +178,13 @@ static void free_multimap_node(struct multimap_n *pnode)
    if (pnode->node.rb_left) {
         tmp_map_node = rb_entry(pnode->node.rb_left,
           struct multimap_n, node);
-        free_multimap_node(tmp_map_node);
+        free_multimap_tree(tmp_map_node, release_callback);
    }
 
     if (pnode->node.rb_right) {
         tmp_map_node = rb_entry(pnode->node.rb_right,
             struct multimap_n, node);
-        free_multimap_node(tmp_map_node);
+        free_multimap_tree(tmp_map_node, release_callback);
     }
 
     pnode->node.rb_left = NULL;
@@ -193,12 +195,13 @@ static void free_multimap_node(struct multimap_n *pnode)
 
     list_for_each_entry_safe(list_node, tmp_list_node, &tmp_map_node->entry,
             head) {
+        release_callback(list_node);
         free(list_node);
     }
     free(tmp_map_node);
 }
 
-void multimap_release(struct multimap *src_map)
+void multimap_release(struct multimap *src_map, release_multimap_node release_callback)
 {
     struct multimap_n *tmp_map_node = NULL;
 
@@ -209,5 +212,5 @@ void multimap_release(struct multimap *src_map)
         return;
 
     tmp_map_node = rb_entry(src_map->root.rb_node, struct multimap_n, node);
-    free_multimap_node(tmp_map_node);
+    free_multimap_tree(tmp_map_node, release_callback);
 }
