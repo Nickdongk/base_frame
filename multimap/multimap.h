@@ -30,8 +30,8 @@ extern void multimap_release(struct multimap *src_map, release_multimap_node rel
 
 extern struct multimap_n *map_first(struct multimap *map);
 extern struct multimap_n *map_next(struct multimap_n *map_node);
-extern int map_add(struct multimap *map, char* key, void* val, size_t val_len);
-extern struct multimap_n *map_get(struct multimap *map, char *key);
+extern int multimap_add(struct multimap *map, char* key, void* val, size_t val_len);
+extern struct multimap_n *multimap_get(struct multimap *map, char *key);
 
 #endif  //_MAP_H
 
