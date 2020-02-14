@@ -15,7 +15,12 @@ HEADERS_ALL:= $(wildcard $(TOP_DIR)/share/include/*/*.h)
 HEADERS_ALL += $(wildcard $(TOP_DIR)/map/*.h)
 HEADERS_ALL += $(wildcard $(TOP_DIR)/set/*.h)
 HEADERS_ALL += $(wildcard $(TOP_DIR)/multimap/*.h)
+HEADERS_ALL += $(wildcard $(TOP_DIR)/queue/*.h)
+HEADERS_ALL += $(wildcard $(TOP_DIR)/stack/*.h)
 
+
+SRCS += $(wildcard $(TOP_DIR)/queue/*.c)
+SRCS += $(wildcard $(TOP_DIR)/stack/*.c)
 SRCS += $(wildcard $(TOP_DIR)/map/*.c)
 SRCS += $(wildcard $(TOP_DIR)/set/*.c)
 SRCS += $(wildcard $(TOP_DIR)/multimap/*.c)
@@ -27,6 +32,8 @@ TEST_SRCS := $(wildcard $(TOP_DIR)/test/*.c)
 TEST_OBJS := $(patsubst %.c,%, $(TEST_SRCS))
 
 
+DEP_LIBS += -lpthread
+
 .phony: all libs example clean
 
 all: example
@@ -37,7 +44,7 @@ libs: $(OBJS)
 $(OBJS): $(HEADERS_FILE)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@ -I$(HEADERS_DIR)
+	$(CC) -c $(CFLAGS) $< -o $@ -I$(HEADERS_DIR) $(DEP_LIBS)
 
 example: $(TEST_OBJS)
 

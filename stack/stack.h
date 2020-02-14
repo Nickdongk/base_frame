@@ -4,13 +4,13 @@
 #include <list.h>
 
 struct stack_n {
-	list_head head;
+	struct list_head head;
 	void* ptr;
 };
 
 struct stack {
-	list_head entry;
-	size_t len;	
+	struct list_head entry;
+	size_t len;
 };
 
 

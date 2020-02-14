@@ -54,7 +54,7 @@ void* stack_pop(struct stack* stack_in)
 	stack_in->len--;
 
 	p_stack_n = container_of(stack_in->entry.prev, struct stack_n, head);
-	val = p_stack_n->val;
+	val = p_stack_n->ptr;
 	free(p_stack_n);
 	return val;
 }
