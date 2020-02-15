@@ -107,6 +107,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
     INIT_LIST_HEAD(&pmap->entry);
     strcpy(pmap->key, key);
     pmap->num = 0;
+    pmap->map_in = map;
 
     list_node = malloc(sizeof(struct multimap_list_n));
     if (!list_node) {
@@ -130,6 +131,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
 
             list_node->val = val;
             list_node->len = val_len;
+            list_node->map_n_in = this_node;
             list_add(&list_node->head, &this_node->entry);
             this_node->num ++;
             return 1;
@@ -140,6 +142,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
     rb_insert_color(&pmap->node, &map->root);
     list_node->val = val;
     list_node->len = val_len;
+    list_node->map_n_in = pmap;
     list_add(&list_node->head, &pmap->entry);
     pmap->num ++;
     map->count ++;

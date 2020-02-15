@@ -14,11 +14,12 @@ struct multimap_n {
     char *key;
     size_t num;
     struct list_head entry;
-
+    struct multimap *map_in;
 };
 
 struct multimap_list_n {
     struct list_head head;
+    struct multimap_n *map_n_in;
     void *val;
     size_t len;
 };
