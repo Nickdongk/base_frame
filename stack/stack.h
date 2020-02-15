@@ -15,7 +15,7 @@ struct stack {
 
 
 
-typedef void (*release_stack_node)(struct stack_n* p_stack_n);
+typedef void (*release_stack_node)(struct stack_n *p_stack_n);
 
 extern struct stack *stack_create(void);
 extern size_t stack_len(struct stack *stack_in);
