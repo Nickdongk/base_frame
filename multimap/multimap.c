@@ -132,7 +132,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
             list_node->val = val;
             list_node->len = val_len;
             list_node->map_n_in = this_node;
-            list_add(&list_node->head, &this_node->entry);
+            list_add_tail(&list_node->head, &this_node->entry);
             this_node->num ++;
             return 1;
         }
@@ -143,7 +143,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
     list_node->val = val;
     list_node->len = val_len;
     list_node->map_n_in = pmap;
-    list_add(&list_node->head, &pmap->entry);
+    list_add_tail(&list_node->head, &pmap->entry);
     pmap->num ++;
     map->count ++;
 

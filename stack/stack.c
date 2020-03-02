@@ -36,8 +36,8 @@ int stack_push(struct stack* stack_in, void* val)
 	}
 
 	p_stack_n->ptr = val;
-	list_add(&p_stack_n->head, &stack_in->entry);
-	stack_in->len++;
+	list_add_tail(&p_stack_n->head, &stack_in->entry);
+	stack_in->len ++;
 
 	return 1;
 }
@@ -50,10 +50,10 @@ void* stack_pop(struct stack* stack_in)
 	if (!stack_in->len)
 		return NULL;
 
-	list_del(stack_in->entry.prev);
+	p_stack_n = container_of(stack_in->entry.prev, struct stack_n, head);
+    list_del(stack_in->entry.prev);
 	stack_in->len--;
 
-	p_stack_n = container_of(stack_in->entry.prev, struct stack_n, head);
 	val = p_stack_n->ptr;
 	free(p_stack_n);
 	return val;
