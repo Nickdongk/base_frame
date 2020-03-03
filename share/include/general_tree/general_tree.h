@@ -13,8 +13,7 @@ struct general_tree {
 
 
 struct tree_node {
-	char *name;
-	unsigned int key;
+	char *key;
     unsigned int index;
 	unsigned int chld_num;
 	unsigned int nodes_num;
@@ -29,9 +28,9 @@ extern void tree_init(struct general_tree *tree);
 
 extern int tree_add_node(struct general_tree *tree, struct tree_node *parent, struct tree_node *src_node);
 
-extern struct tree_node *tree_node_alloc_nc(char *name, unsigned int key, unsigned int num);
+extern struct tree_node *tree_node_alloc_nc(char *key, unsigned int num);
 
-extern struct tree_node *tree_node_alloc_binary(char *name, unsigned int key);
+extern struct tree_node *tree_node_alloc_binary(char *key);
 
 extern size_t tree_size(struct general_tree *tree);
 

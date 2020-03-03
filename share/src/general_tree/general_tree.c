@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stack.h>
 #include <general_tree.h>
+#include <baselib.h>
 
 
 struct general_tree *tree_create(void)
@@ -105,10 +106,11 @@ size_t tree_chld_tree_size(struct tree_node *pnode)
     return size;
 }
 
-struct tree_node *tree_node_alloc_nc(char *name, unsigned int key, unsigned int num)
+struct tree_node *tree_node_alloc_nc(char *key, unsigned int num)
 {
 	struct tree_node *tmp_node = NULL;
     struct tree_node **p_nodes = NULL;
+    char *tmp_key = NULL;
 	int i = 0;
 
 	tmp_node = malloc(sizeof(struct tree_node));
@@ -123,9 +125,16 @@ struct tree_node *tree_node_alloc_nc(char *name, unsigned int key, unsigned int 
         goto fail;
     }
 
+    tmp_key = malloc(B_ROUND(strlen(key), 4));
+    if (!tmp_key) {
+        fprintf(stderr, "fail to malloc key space\n");
+        goto fail;
+    }
+
+    strcpy(tmp_key, key);
+
     tmp_node->nodes = p_nodes;
-	tmp_node->name = name;
-	tmp_node->key = key;
+	tmp_node->key = tmp_key;
     tmp_node->index = 0;
 	tmp_node->chld_num = 0;
 	tmp_node->nodes_num = num;
@@ -140,6 +149,8 @@ struct tree_node *tree_node_alloc_nc(char *name, unsigned int key, unsigned int 
 fail:
     if (tmp_node)
         free(tmp_node);
+    if (tmp_key)
+        free(tmp_key);
     if (p_nodes)
         free(p_nodes);
 
@@ -147,9 +158,9 @@ fail:
 
 }
 
-struct tree_node *tree_node_alloc_binary(char *name, unsigned int key)
+struct tree_node *tree_node_alloc_binary(char *key)
 {
-	return tree_node_alloc_nc(name, key, 2);
+	return tree_node_alloc_nc(key, 2);
 }
 
 
@@ -165,8 +176,9 @@ void release_tree(struct tree_node *root)
 			release_tree(root->nodes[i]);
 	}
 
-	free(root);
     free(root->nodes);
+    free(root->key);
+	free(root);
 }
 
 void tree_remove_chld_tree(struct tree_node *pnode)
@@ -233,15 +245,15 @@ static int traverse_tree(struct tree_node * root, struct stack *p_stack)
 
 		if (!cur_node->chld_num) {
 			if (flag)
-				printf("----%c\n", cur_node->key);
+				printf("----%s\n", cur_node->key);
 			else
-				printf("\b|----%c\n", cur_node->key);
+				printf("\b|----%s\n", cur_node->key);
 		} else {
 
 			if (flag)
-				printf("----%c\n", cur_node->key);
+				printf("----%s\n", cur_node->key);
 			else
-				printf("\b|----%c\n", cur_node->key);
+				printf("\b|----%s\n", cur_node->key);
         }
 
         if (cur_node->chld_num) {
