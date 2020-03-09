@@ -12,6 +12,7 @@
 #include <rbtree.h>
 #include <stdlib.h>
 #include <string.h>
+#include <list.h>
 
 struct set {
     struct rb_root root;
@@ -23,6 +24,9 @@ struct set_n {
     void *val;
     size_t len;
 };
+
+#define set_for_each_node(node, src_set) \
+    for(node = set_first(src_set); node != NULL; node = set_next(node))
 
 extern struct set *set_create(void);
 extern void set_release(struct set *src_set);

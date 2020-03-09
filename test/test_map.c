@@ -4,16 +4,10 @@
 #include <unistd.h>
 #include <string.h>
 
-void release_mapnode(struct map_n *node)
-{
-    if (node->val)
-        free(node->val);
-}
-
 int main(int argc, char *argv[])
 {
     char key[16] = {0};
-    char *word = NULL;
+    char word[16] = {0};
     struct map *g_map = NULL;
     struct map_n *n_map = NULL;
     char *r_val = NULL;
@@ -30,9 +24,6 @@ int main(int argc, char *argv[])
 
     for (i = 0; i < 20; i ++) {
         sprintf(key, "hello%d", i);
-        word = malloc(32);
-        if (!word)
-            goto fail;
         sprintf(word, "word%d", i);
         ret = map_add(g_map, key, word, strlen(word) + 1);
         if (ret < 0) {
@@ -73,7 +64,7 @@ fail:
     }
 
     if (g_map)
-        map_release(g_map, release_mapnode);
+        map_release(g_map);
 
     return 0;
 }

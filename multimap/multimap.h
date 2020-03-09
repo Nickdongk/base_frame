@@ -24,10 +24,10 @@ struct multimap_list_n {
     size_t len;
 };
 
-typedef void (*release_multimap_node)(struct multimap_list_n *list_n);
+#define multimap_for_each_keynode(ptr, key_in)  list_for_each_entry(ptr, &key_in->entry, head)
 
 extern struct multimap *multimap_create(void);
-extern void multimap_release(struct multimap *src_map, release_multimap_node release_callback);
+extern void multimap_release(struct multimap *src_map);
 
 extern struct multimap_n *map_first(struct multimap *map);
 extern struct multimap_n *map_next(struct multimap_n *map_node);

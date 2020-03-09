@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 
 #include "set.h"
 
@@ -25,9 +26,10 @@ static void free_set_node(struct set_n *pnode)
     pnode->node.rb_left = NULL;
     pnode->node.rb_right = NULL;
     tmp_set_node = pnode;
+
+    free(tmp_set_node->val);
     tmp_set_node->val = NULL;
     tmp_set_node->len = 0;
-
     free(tmp_set_node);
 }
 
@@ -43,6 +45,8 @@ void set_release(struct set *src_set)
 
     tmp_set_node = rb_entry(src_set->root.rb_node, struct set_n, node);
     free_set_node(tmp_set_node);
+    free(src_set);
+
 }
 
 struct set *set_create(void)
@@ -92,7 +96,7 @@ int set_contain(struct set *src_set, void *val, size_t len)
     }
 
     return 0;
-} 
+}
 
 int set_add(struct set *src_set, void *val, size_t len)
 {
@@ -101,7 +105,23 @@ int set_add(struct set *src_set, void *val, size_t len)
     struct rb_node *parent = NULL;
     struct set_n *this_node = NULL;
     struct list_n *this_list = NULL;
+    char *val_tmp = NULL;
     int ret = 0;
+
+    if (src_set == NULL) {
+        fprintf(stderr, "src set is NULL\n");
+        return -1;
+    }
+
+    if (val == NULL) {
+        fprintf(stderr, "val can not be NULL\n");
+        return -1;
+    }
+
+    if (len <= 0) {
+        fprintf(stderr, "len must not be zero\n");
+        return -1;
+    }
 
     pset_n = malloc(sizeof(struct set_n));
     if (!pset_n) {
@@ -109,15 +129,24 @@ int set_add(struct set *src_set, void *val, size_t len)
         return -1;
     }
 
+    val_tmp = malloc(len);
+    if (!val_tmp) {
+        fprintf(stderr, "malloc val space fail.\n");
+        return -1;
+    }
+
+    memcpy(val_tmp, val, len);
+
     while (*new_node) {
         this_node = container_of(*new_node, struct set_n, node);
         parent = *new_node;
-        ret = memcmp(val, this_node->val, len);
+        ret = memcmp(val_tmp, this_node->val, len);
         if (ret < 0) {
             new_node = &((*new_node)->rb_left);
         } else if (ret > 0) {
             new_node = &((*new_node)->rb_right);
         } else {
+            free(val_tmp);
             free(pset_n);
             return 0;
         }
@@ -125,7 +154,7 @@ int set_add(struct set *src_set, void *val, size_t len)
 
     rb_link_node(&pset_n->node, parent, new_node);
     rb_insert_color(&pset_n->node, &src_set->root);
-    pset_n->val = val;
+    pset_n->val = val_tmp;
     pset_n->len = len;
     src_set->nodes_num ++;
 
@@ -144,11 +173,13 @@ int set_remove(struct set *src_set, void *val, size_t len)
         ret = memcmp(val, this_node->val, len);
         if (ret < 0)
             pnode = pnode->rb_left;
-        else if (ret > 0) 
+        else if (ret > 0)
             pnode = pnode->rb_right;
         else {
                 src_set->nodes_num --;
                 rb_erase(&this_node->node, &src_set->root);
+                free(this_node->val);
+                free(this_node);
                 return 1;
         }
     }
@@ -272,9 +303,9 @@ struct set *set_intersection(struct set *src_set, struct set *dst_set)
         return dst_set;
 
     r_set = set_create();
-    if (!r_set) { 
+    if (!r_set) {
         fprintf(stderr, "fail to create set\n");
-        return NULL; 
+        return NULL;
     }
     tmp_set_node = set_first(src_set);
     if (!tmp_set_node) {

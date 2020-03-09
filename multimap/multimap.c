@@ -63,6 +63,7 @@ int  multimap_remove(struct multimap *map, char *key, void *val, size_t val_len)
             }
             if (plist && &plist->head != &pmap->entry) {
                 list_del(&plist->head);
+                free(plist->val);
                 free(plist);
                 pmap->num --;
                 if (!pmap->num) {
@@ -89,6 +90,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
     struct rb_node *parent = NULL;
     struct multimap_n *this_node = NULL;
     struct multimap_list_n *list_node = NULL;
+    void *val_tmp = NULL;
     int ret = 0;
 
     pmap = malloc(sizeof(struct multimap_n));
@@ -116,6 +118,13 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
     }
 
     INIT_LIST_HEAD(&list_node->head);
+
+    val_tmp = malloc(val_len);
+    if (!val_tmp) {
+        fprintf(stderr, "malloc val space fail\n");
+        goto fail;
+    }
+
     while (*new_node) {
         this_node = container_of(*new_node, struct multimap_n, node);
         ret = strcmp(key, this_node->key);
@@ -129,7 +138,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
             free(pmap->key);
             free(pmap);
 
-            list_node->val = val;
+            list_node->val = val_tmp;
             list_node->len = val_len;
             list_node->map_n_in = this_node;
             list_add_tail(&list_node->head, &this_node->entry);
@@ -140,7 +149,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
 
     rb_link_node(&pmap->node, parent, new_node);
     rb_insert_color(&pmap->node, &map->root);
-    list_node->val = val;
+    list_node->val = val_tmp;
     list_node->len = val_len;
     list_node->map_n_in = pmap;
     list_add_tail(&list_node->head, &pmap->entry);
@@ -156,6 +165,8 @@ fail:
         free(pmap);
     if (list_node)
         free(list_node);
+    if (val_tmp)
+        free(val_tmp);
 
     return -1;
 }
@@ -173,7 +184,7 @@ struct multimap_n *multimap_next(struct multimap_n *map_node)
     return rb_entry(next, struct multimap_n, node);
 }
 
-static void free_multimap_tree(struct multimap_n *pnode, release_multimap_node release_callback)
+static void free_multimap_tree(struct multimap_n *pnode)
 {
     struct multimap_n *tmp_map_node = NULL;
     struct multimap_list_n *list_node = NULL, *tmp_list_node = NULL;
@@ -181,13 +192,13 @@ static void free_multimap_tree(struct multimap_n *pnode, release_multimap_node r
    if (pnode->node.rb_left) {
         tmp_map_node = rb_entry(pnode->node.rb_left,
           struct multimap_n, node);
-        free_multimap_tree(tmp_map_node, release_callback);
+        free_multimap_tree(tmp_map_node);
    }
 
     if (pnode->node.rb_right) {
         tmp_map_node = rb_entry(pnode->node.rb_right,
             struct multimap_n, node);
-        free_multimap_tree(tmp_map_node, release_callback);
+        free_multimap_tree(tmp_map_node);
     }
 
     pnode->node.rb_left = NULL;
@@ -198,13 +209,13 @@ static void free_multimap_tree(struct multimap_n *pnode, release_multimap_node r
 
     list_for_each_entry_safe(list_node, tmp_list_node, &tmp_map_node->entry,
             head) {
-        release_callback(list_node);
+        free(list_node->val);
         free(list_node);
     }
     free(tmp_map_node);
 }
 
-void multimap_release(struct multimap *src_map, release_multimap_node release_callback)
+void multimap_release(struct multimap *src_map)
 {
     struct multimap_n *tmp_map_node = NULL;
 
@@ -215,5 +226,7 @@ void multimap_release(struct multimap *src_map, release_multimap_node release_ca
         return;
 
     tmp_map_node = rb_entry(src_map->root.rb_node, struct multimap_n, node);
-    free_multimap_tree(tmp_map_node, release_callback);
+    free_multimap_tree(tmp_map_node);
+
+    free(src_map);
 }

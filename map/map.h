@@ -32,10 +32,11 @@ struct map_n {
     size_t val_len;
 };
 
-typedef void (*release_map_node)(struct map_n *map_node);
+#define map_for_each_node(node, src_map) \
+    for(node = map_first(src_map); node != NULL; node = map_next(node))
 
 extern struct map *map_create(void);
-extern void map_release(struct map *map, release_map_node release_callback);
+extern void map_release(struct map *map);
 
 extern struct map_n *map_first(struct map *map);
 extern struct map_n *map_next(struct map_n *map_node);

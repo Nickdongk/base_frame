@@ -75,6 +75,7 @@ int map_add(struct map *map, char* key, void* val, size_t val_len)
     struct rb_node **new_node = &map->root.rb_node;
     struct rb_node *parent = NULL;
     struct map_n *this_node = NULL;
+    void *val_tmp = NULL;
     int ret = 0;
 
     pmap = malloc(sizeof(struct map_n));
@@ -91,10 +92,15 @@ int map_add(struct map *map, char* key, void* val, size_t val_len)
         goto fail;
     }
 
+    val_tmp = malloc(val_len);
+    if (!val_tmp) {
+        fprintf(stderr, "malloc val space fail\n");
+        goto fail;
+    }
 
     strcpy(pmap->key, key);
     pmap->val_len = val_len;
-    pmap->val = val;
+    pmap->val = val_tmp;
 
     while (*new_node) {
         this_node = container_of(*new_node, struct map_n, node);
@@ -107,6 +113,7 @@ int map_add(struct map *map, char* key, void* val, size_t val_len)
             new_node = &((*new_node)->rb_right);
         }else {
             free(pmap->key);
+            free(pmap->val);
             free(pmap);
             return 0;
         }
@@ -121,6 +128,8 @@ int map_add(struct map *map, char* key, void* val, size_t val_len)
 fail:
     if (pmap->key)
         free(pmap->key);
+    if (pmap->val)
+        free(pmap->val);
     if (pmap)
         free(pmap);
 
@@ -140,20 +149,20 @@ struct map_n *map_next(struct map_n *map_node)
     return rb_entry(next, struct map_n, node);
 }
 
-static void free_map_tree(struct map_n *pnode, release_map_node release_func)
+static void free_map_tree(struct map_n *pnode)
 {
     struct map_n *tmp_map_node = NULL;
 
    if (pnode->node.rb_left) {
         tmp_map_node = rb_entry(pnode->node.rb_left,
           struct map_n, node);
-        free_map_tree(tmp_map_node, release_func);
+        free_map_tree(tmp_map_node);
    }
 
     if (pnode->node.rb_right) {
         tmp_map_node = rb_entry(pnode->node.rb_right,
             struct map_n, node);
-        free_map_tree(tmp_map_node, release_func);
+        free_map_tree(tmp_map_node);
     }
 
     pnode->node.rb_left = NULL;
@@ -162,12 +171,13 @@ static void free_map_tree(struct map_n *pnode, release_map_node release_func)
     if (tmp_map_node->key)
         free(tmp_map_node->key);
 
-    release_func(tmp_map_node);
+    if (tmp_map_node->val)
+        free(tmp_map_node->val);
 
     free(tmp_map_node);
 }
 
-void map_release(struct map *src_map, release_map_node release_callback)
+void map_release(struct map *src_map)
 {
     struct map_n *tmp_map_node = NULL;
 
@@ -178,5 +188,6 @@ void map_release(struct map *src_map, release_map_node release_callback)
         return;
 
     tmp_map_node = rb_entry(src_map->root.rb_node, struct map_n, node);
-    free_map_tree(tmp_map_node, release_callback);
+    free_map_tree(tmp_map_node);
+    free(src_map);
 }
