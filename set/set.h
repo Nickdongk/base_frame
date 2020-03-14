@@ -45,4 +45,5 @@ extern int set_remove(struct set *src_set,void *val, size_t len);
 extern size_t set_length(struct set *src_set);
 extern struct set *set_difference(struct set *src_set, struct set *dst_set);
 extern int set_cmp(struct set *src_set, struct set *dst_set);
+extern void set_add_set(struct set *src_set, struct set *dst_set);
 #endif  //_MAP_H
