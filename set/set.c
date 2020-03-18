@@ -343,6 +343,12 @@ struct set *set_difference(struct set *src_set, struct set *dst_set)
         return NULL;
     }
 
+    tmp_set_node = set_first(src_set);
+    if (!tmp_set_node) {
+        fprintf(stderr, "no node in set\n");
+        goto fail;
+    }
+
     while (tmp_set_node) {
         ret = set_contain(dst_set, tmp_set_node->val, tmp_set_node->len);
         if (!ret)
@@ -353,6 +359,9 @@ struct set *set_difference(struct set *src_set, struct set *dst_set)
     if (r_set->nodes_num)
         return r_set;
 
+
+fail:
+    set_release(r_set);
     return NULL;
 }
 
@@ -368,3 +377,25 @@ int set_cmp(struct set *src_set, struct set *dst_set)
     return 0;
 }
 
+int set_add_set(struct set *src_set, struct set *dst_set)
+{
+    struct set_n *tmp_set_node = NULL;
+    int ret = 0;
+
+    if (!src_set->nodes_num)
+        return -1;
+
+    tmp_set_node = set_first(src_set);
+    if (!tmp_set_node) {
+        fprintf(stderr, "no node in set\n");
+        return -1;
+    }
+
+    while (tmp_set_node) {
+       ret = set_contain(dst_set, tmp_set_node->val, tmp_set_node->len);
+       if (!ret)
+            set_add(dst_set, tmp_set_node->val, tmp_set_node->len);
+       tmp_set_node = set_next(tmp_set_node);
+    }
+
+}

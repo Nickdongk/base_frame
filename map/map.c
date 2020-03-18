@@ -98,7 +98,9 @@ int map_add(struct map *map, char* key, void* val, size_t val_len)
         goto fail;
     }
 
+
     strcpy(pmap->key, key);
+    memcpy(val_tmp, val, val_len);
     pmap->val_len = val_len;
     pmap->val = val_tmp;
 

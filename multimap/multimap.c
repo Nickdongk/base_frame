@@ -83,7 +83,7 @@ int  multimap_remove(struct multimap *map, char *key, void *val, size_t val_len)
 }
 
 
-int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
+int multimap_add(struct multimap *map, char *key, void *val, size_t val_len)
 {
     struct multimap_n *pmap = NULL;
     struct rb_node **new_node = &map->root.rb_node;
@@ -124,6 +124,7 @@ int multimap_add(struct multimap *map, char* key, void* val, size_t val_len)
         fprintf(stderr, "malloc val space fail\n");
         goto fail;
     }
+    memcpy(val_tmp, val, val_len);
 
     while (*new_node) {
         this_node = container_of(*new_node, struct multimap_n, node);
@@ -209,6 +210,7 @@ static void free_multimap_tree(struct multimap_n *pnode)
 
     list_for_each_entry_safe(list_node, tmp_list_node, &tmp_map_node->entry,
             head) {
+        list_del(&list_node->head);
         free(list_node->val);
         free(list_node);
     }

@@ -100,7 +100,7 @@ extern struct multimap_n *multimap_get(struct multimap *map, char *key);
  *be removed.
  */
 
-extern int  multimap_remove(struct multimap *map, char *key, void *val, size_t val_len)
+extern int  multimap_remove(struct multimap *map, char *key, void *val, size_t val_len);
 
 #endif  //_MAP_H
 
